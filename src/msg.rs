@@ -10,13 +10,13 @@ pub struct InitMsg {}
 pub enum HandleMsg {
     Add { credits: i32, address: HumanAddr },
     Reset {},
-    GetCredits {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
     GetCount {},
+    GetCredits { address: HumanAddr },
 }
 
 // We define a custom struct for each query response

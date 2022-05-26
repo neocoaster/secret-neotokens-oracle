@@ -27,6 +27,6 @@ pub fn credits_storage<S: Storage>(store: &mut S) -> Bucket<S, i32> {
     bucket(BUCKET_USER_CREDITS, store)
 }
 
-pub fn credits_storage_read<S: Storage>(store: &mut S) -> ReadonlyBucket<S, i32> {
+pub fn credits_storage_read<S: Storage>(store: &S) -> ReadonlyBucket<S, i32> {
     bucket_read(BUCKET_USER_CREDITS, store)
 }
