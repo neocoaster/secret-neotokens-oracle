@@ -23,10 +23,10 @@ pub fn config_read<S: Storage>(storage: &S) -> ReadonlySingleton<S, State> {
     singleton_read(storage, CONFIG_KEY)
 }
 
-pub fn credits_storage<S: Storage>(store: &mut S) -> Bucket<S, i32> {
+pub fn credits_storage<S: Storage>(store: &mut S) -> Bucket<S, u64> {
     bucket(BUCKET_USER_CREDITS, store)
 }
 
-pub fn credits_storage_read<S: Storage>(store: &S) -> ReadonlyBucket<S, i32> {
+pub fn credits_storage_read<S: Storage>(store: &S) -> ReadonlyBucket<S, u64> {
     bucket_read(BUCKET_USER_CREDITS, store)
 }

@@ -5,18 +5,23 @@
     {
       "type": "object",
       "required": [
-        "add_credits"
+        "add"
       ],
       "properties": {
-        "add_credits": {
+        "add": {
           "type": "object",
           "required": [
+            "address",
             "credits"
           ],
           "properties": {
+            "address": {
+              "$ref": "#/definitions/HumanAddr"
+            },
             "credits": {
               "type": "integer",
-              "format": "int32"
+              "format": "uint64",
+              "minimum": 0.0
             }
           }
         }
@@ -33,5 +38,10 @@
         }
       }
     }
-  ]
+  ],
+  "definitions": {
+    "HumanAddr": {
+      "type": "string"
+    }
+  }
 }

@@ -3,17 +3,9 @@
   "title": "State",
   "type": "object",
   "required": [
-    "owned_credits",
     "owner"
   ],
   "properties": {
-    "owned_credits": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "integer",
-        "format": "int32"
-      }
-    },
     "owner": {
       "$ref": "#/definitions/CanonicalAddr"
     }
