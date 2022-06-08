@@ -21,7 +21,7 @@
 
 `CODE_ID=1`
 
-`secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "my counter" -y --keyring-backend test`
+`secretd tx compute instantiate $CODE_ID "$INIT" --from a --label "neotokens-oracle" -y --keyring-backend test`
 
 `secretd query compute list-contract-by-code 1`
 

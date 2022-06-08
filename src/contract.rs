@@ -30,6 +30,7 @@ pub fn query<S: Storage, A: Api, Q: Querier>(
 ) -> StdResult<Binary> {
     match msg {
         QueryMsg::GetCount {} => to_binary(&query_count(deps)?),
+        QueryMsg::GetCredits { address } => to_binary(&try_get_credits(deps, address)?),
     }
 }
 
@@ -47,7 +48,6 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
     match msg {
         HandleMsg::Add { credits, address } => try_add_credits(deps, env, credits, address),
         HandleMsg::Reset {} => try_reset(deps, env),
-        HandleMsg::GetCredits {} => try_get_credits(deps, env),
     }
 }
 
@@ -66,7 +66,7 @@ pub fn try_add_credits<S: Storage, A: Api, Q: Querier>(
     }
 
     let _current_user_credits =
-        match credits_storage_read(&mut deps.storage).load(receiver_address_canonical.as_slice()) {
+        match credits_storage_read(&deps.storage).load(receiver_address_canonical.as_slice()) {
             Ok(current_credits) => {
                 if let Some(new_balance) = (current_credits).checked_add(credits) {
                     // TODO: IMPROVE ERROR HANDLING
@@ -95,22 +95,18 @@ pub fn try_add_credits<S: Storage, A: Api, Q: Querier>(
 }
 
 fn try_get_credits<S: Storage, A: Api, Q: Querier>(
-    deps: &mut Extern<S, A, Q>,
-    env: Env,
-) -> StdResult<HandleResponse> {
-    let sender_address = deps.api.canonical_address(&env.message.sender)?;
+    deps: &Extern<S, A, Q>,
+    address: HumanAddr,
+) -> StdResult<CreditsResponse> {
+    let address_canonical = deps.api.canonical_address(&address)?;
     let current_user_credits =
-        match credits_storage_read(&mut deps.storage).load(sender_address.as_slice()) {
+        match credits_storage_read(&deps.storage).load(address_canonical.as_slice()) {
             Ok(current_credits) => current_credits,
             Err(_error) => 0,
         };
 
-    Ok(HandleResponse {
-        messages: vec![],
-        log: vec![],
-        data: Some(to_binary(&CreditsResponse {
-            owned_credits: current_user_credits,
-        })?),
+    Ok(CreditsResponse {
+        owned_credits: current_user_credits,
     })
 }
 
@@ -125,6 +121,7 @@ pub fn try_reset<S: Storage, A: Api, Q: Querier>(
         return Err(StdError::Unauthorized { backtrace: None });
     }
 
+    // TODO: FLUSH STORAGE
     // credits_storage(&mut deps.storage).clear();
 
     debug_print("credits reset successfully");
@@ -150,7 +147,7 @@ mod tests {
         assert_eq!(0, res.messages.len());
 
         // it worked, let's query the state
-        let res = query(&deps, QueryMsg::GetCount {}).unwrap();
+        let res = query(&mut deps, QueryMsg::GetCount {}).unwrap();
         let value: CountResponse = from_binary(&res).unwrap();
         assert_eq!(10, value.count);
     }
@@ -172,36 +169,19 @@ mod tests {
         let _res = handle(&mut deps, env, msg).unwrap();
 
         let querier_env = mock_env("demian", &coins(2, "token"));
-        let res = handle(&mut deps, querier_env, HandleMsg::GetCredits {});
-        let value: CreditsResponse = from_binary(&res.unwrap().data.unwrap()).unwrap();
+        let res = query(
+            &mut deps,
+            QueryMsg::GetCredits {
+                address: querier_env.message.sender,
+            },
+        )
+        .unwrap();
+        let value: CreditsResponse = from_binary(&res).unwrap();
         assert_eq!(7, value.owned_credits);
     }
 
     // #[test]
     // fn reset() {
-    //     let mut deps = mock_dependencies(20, &coins(2, "token"));
-
-    //     let msg = InitMsg { count: 17 };
-    //     let env = mock_env("creator", &coins(2, "token"));
-    //     let _res = init(&mut deps, env, msg).unwrap();
-
-    //     // not anyone can reset
-    //     let unauth_env = mock_env("anyone", &coins(2, "token"));
-    //     let msg = HandleMsg::Reset { count: 5 };
-    //     let res = handle(&mut deps, unauth_env, msg);
-    //     match res {
-    //         Err(StdError::Unauthorized { .. }) => {}
-    //         _ => panic!("Must return unauthorized error"),
-    //     }
-
-    //     // only the original creator can reset the counter
-    //     let auth_env = mock_env("creator", &coins(2, "token"));
-    //     let msg = HandleMsg::Reset { count: 5 };
-    //     let _res = handle(&mut deps, auth_env, msg).unwrap();
-
-    //     // should now be 5
-    //     let res = query(&deps, QueryMsg::GetCount {}).unwrap();
-    //     let value: CountResponse = from_binary(&res).unwrap();
-    //     assert_eq!(5, value.count);
+    //     PENDING
     // }
 }
