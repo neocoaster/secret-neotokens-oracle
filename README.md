@@ -5,11 +5,11 @@
 
 # START BLOCKCHAIN:
 
-`docker run -it --rm -p 26657:26657 -p 26656:26656 -p 1337:1337 -p 9091:9091 -v $(pwd):/root/code --name secretdev enigmampc/secret-network-sw-dev`
+`docker run -d -it -p 9091:9091 -p 26657:26657 -p 13170:1317 -p 5000:5000 -v $(pwd):/root/code --name localsecret ghcr.io/scrtlabs/localsecret`
 
 # CONNECT TO NODE:
 
-`docker exec -it secretdev /bin/bash`
+`docker exec -it localsecret /bin/bash`
 
 # INSIDE NODE:
 
@@ -25,8 +25,12 @@
 
 `secretd query compute list-contract-by-code 1`
 
+# TO GET THE CONTRACT'S HASH (ignore 0x from output)
+
+`secretd q compute contract-hash <address>`
+
 # RUN TRANSACTIONS
 
-`secretd tx compute execute $CONTRACT '{"add": {"credits":5, "address":"secret1dyndv273y0d0w2tq4gqtx5mjjhuzl5cf6hfqe6"}}' --from a --keyring-backend test`
+`secretd tx compute execute $CONTRACT '{"add": {"credits":5, "address":"secret1fc3fzy78ttp0lwuujw7e52rhspxn8uj52zfyne"}}' --from a --keyring-backend test`
 
-`secretd tx compute execute $CONTRACT '{"get_credits": {}}' --from a --keyring-backend test`
+`secretd query compute query $CONTRACT '{"get_credits": { "address": "secret1fc3fzy78ttp0lwuujw7e52rhspxn8uj52zfyne" }}'`

@@ -54,7 +54,7 @@ pub fn handle<S: Storage, A: Api, Q: Querier>(
 pub fn try_add_credits<S: Storage, A: Api, Q: Querier>(
     deps: &mut Extern<S, A, Q>,
     env: Env,
-    credits: i32,
+    credits: u64,
     address: HumanAddr,
 ) -> StdResult<HandleResponse> {
     let sender_address_raw = deps.api.canonical_address(&env.message.sender)?;
